@@ -29,7 +29,7 @@ describe('GET /tasks', () => {
   })
 })
 
-const newTask = {
+const newTaskNoId = {
   title: 'New Task',
   description: 'Description for the new task',
 }
@@ -43,12 +43,12 @@ const taskWithId = {
 
 describe('POST /tasks', () => {
   it('creates a task without a set id', async () => {
-    const postResponse = await request(app).post('/tasks').send(newTask)
+    const postResponse = await request(app).post('/tasks').send(newTaskNoId)
 
     expect(postResponse.status).toBe(201)
     expect(postResponse.body).toHaveProperty('id')
-    expect(postResponse.body.title).toBe(newTask.title)
-    expect(postResponse.body.description).toBe(newTask.description)
+    expect(postResponse.body.title).toBe(newTaskNoId.title)
+    expect(postResponse.body.description).toBe(newTaskNoId.description)
     // Defaults completed to false
     expect(postResponse.body.completed).toBe(false)
 
@@ -89,6 +89,30 @@ describe('POST /tasks', () => {
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
   })
+
+  it('returns 400 when id is not string | number', async () => {
+    const postResponse = await request(app)
+      .post('/tasks')
+      .send({ ...newTaskNoId, id: true })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task; id must be string or number',
+    )
+  })
+
+  it('returns 400 when title is not provided', async () => {
+    const postResponse = await request(app)
+      .post('/tasks')
+      .send({ ...newTaskNoId, title: '' })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task; title required',
+    )
+  })
 })
 
 describe('DELETE /tasks/:id', () => {
@@ -121,7 +145,7 @@ describe('DELETE /tasks/:id', () => {
 describe('PUT /tasks/:id', () => {
   let task: Task
   beforeEach(async () => {
-    const response = await request(app).post('/tasks').send(newTask)
+    const response = await request(app).post('/tasks').send(newTaskNoId)
     task = response.body
   })
 

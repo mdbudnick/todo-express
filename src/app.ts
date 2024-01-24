@@ -45,6 +45,10 @@ app.get('/tasks/:id', (req: Request, res: Response) => {
 let GLOBAL_TASK_ID_INCREMENTER = 1000
 app.post('/tasks', (req: Request, res: Response) => {
   const { id, title, description, completed }: Task = req.body
+  if (id !== undefined && !(typeof id === 'string' || typeof id === 'number')) {
+    res.status(400).json({ error: 'Invalid Task; id must be string or number' })
+    return
+  }
   if (!title) {
     res.status(400).json({ error: 'Invalid Task; title required' })
     return
