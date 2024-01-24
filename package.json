@@ -1,0 +1,12 @@
+{
+  "name": "gsu-todo-express",
+  "version": "1.0.0",
+  "description": "CRUD server for TODO application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Michael Budnick",
+  "license": "ISC"
+}
