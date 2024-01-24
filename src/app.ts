@@ -43,7 +43,7 @@ app.get('/tasks/:id', (req: Request, res: Response) => {
   }
 })
 
-let taskId = 1000
+let GLOBAL_TASK_ID_INCREMENTER = 1000
 app.post('/tasks', (req: Request, res: Response) => {
   const { id, title, description, completed }: Task = req.body
 
@@ -55,13 +55,13 @@ app.post('/tasks', (req: Request, res: Response) => {
     const existingTaskIndex = tasks.findIndex((t) => t.id === id)
 
     if (existingTaskIndex !== -1) {
-      res.status(409).json({ error: `Task ${taskId} already exists` })
+      res.status(409).json({ error: `Task ${id} already exists` })
       return
     }
   }
 
   const newTask: Task = {
-    id: id ?? taskId++,
+    id: id ?? ++GLOBAL_TASK_ID_INCREMENTER,
     title,
     description: description ?? '',
     completed: completed ?? false,
