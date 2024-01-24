@@ -78,7 +78,6 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
     res.status(404).json({ error: `Task ${taskId} not found` })
     return
   }
-  const existingTask = tasks[existingTaskIndex]
 
   const { id, title, description, completed }: Task = req.body
 
