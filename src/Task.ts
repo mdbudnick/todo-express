@@ -5,39 +5,51 @@ interface Task {
   completed: boolean
 }
 
-export const equalTasks = (task1: Task, task2: Task): boolean => {
-  return (
-    task1.id === task2.id &&
-    task1.title === task2.title &&
-    task1.description === task2.description &&
-    task1.completed === task2.completed
-  )
+const expectedTypes: Record<string, string[]> = {
+  id: ['string', 'number'],
+  title: ['string'],
+  description: ['string'],
+  completed: ['boolean'],
 }
 
-type ValidationResult = { valid: boolean; message: string; field?: string; type?: string };
+export const equalTasks = (task1: Task, task2: Task): boolean => {
+  for (const key in expectedTypes) {
+    if (task1[key as keyof Task] !== task2[key as keyof Task]) {
+      return false
+    }
+  }
+  // TODO only check the Task has the keys we want
+
+  return true
+}
+
+type ValidationResult = {
+  valid: boolean
+  message: string
+  field?: string
+  type?: string
+}
 
 const validateTask = (task: Task): ValidationResult => {
-  const expectedTypes: Record<string, string[]> = {
-    id: ['string', 'number'],
-    title: ['string'],
-    description: ['string'],
-    completed: ['boolean'],
-  };
-
   for (const field in task) {
     if (!(field in expectedTypes)) {
-      return { valid: false, message: `Unexpected field ${field}` };
+      return { valid: false, message: `Unexpected field ${field}` }
     }
 
-    const expectedType = expectedTypes[field];
+    const expectedType = expectedTypes[field]
     const actualType = typeof task[field as keyof Task]
 
     if (!expectedType.includes(actualType)) {
-      return { valid: false, message: "Invalid type", field, type: expectedType.join(' or ') };
+      return {
+        valid: false,
+        message: 'Invalid type',
+        field,
+        type: expectedType.join(' or '),
+      }
     }
   }
 
-  return { valid: true, message: "Valid Task" };
-};
+  return { valid: true, message: 'Valid Task' }
+}
 
 export default Task
