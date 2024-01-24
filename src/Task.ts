@@ -30,7 +30,7 @@ type ValidationResult = {
   type?: string
 }
 
-const validateTaskFields = (task: Task): ValidationResult => {
+export const validateTaskFields = (task: Task): ValidationResult => {
   for (const field in task) {
     // TODO probably won't need
     // if (!(field in expectedTypes)) {

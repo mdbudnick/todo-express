@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import bodyParser from 'body-parser'
-import Task, { equalTasks } from './Task'
+import Task, { equalTasks, validateTaskFields } from './Task'
 
 const app = express()
 app.use(bodyParser.json())
@@ -44,13 +44,16 @@ app.get('/tasks/:id', (req: Request, res: Response) => {
 
 let GLOBAL_TASK_ID_INCREMENTER = 1000
 app.post('/tasks', (req: Request, res: Response) => {
-  const { id, title, description, completed }: Task = req.body
-  if (id !== undefined && !(typeof id === 'string' || typeof id === 'number')) {
-    res.status(400).json({ error: 'Invalid Task; id must be string or number' })
+  const isValidTask = validateTaskFields(req.body)
+  if (!isValidTask.valid) {
+    res.status(400).json({
+      error: `Invalid Task: ${isValidTask.field!} must be ${isValidTask.type!}`,
+    })
     return
   }
+  const { id, title, description, completed }: Task = req.body
   if (!title) {
-    res.status(400).json({ error: 'Invalid Task; title required' })
+    res.status(400).json({ error: 'Invalid Task: title required' })
     return
   }
   if (id || id === 0) {

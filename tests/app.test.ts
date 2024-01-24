@@ -49,17 +49,35 @@ describe('POST /tasks', () => {
     expect(postResponse.body).toHaveProperty('id')
     expect(postResponse.body.title).toBe(newTaskNoId.title)
     expect(postResponse.body.description).toBe(newTaskNoId.description)
-    // Defaults completed to false
-    expect(postResponse.body.completed).toBe(false)
+    expect(postResponse.body.completed).toBe(false) // false is default
 
     const taskId = postResponse.body.id
 
-    // Check that /tasks returns length of 1
     const tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
 
-    // Check that /tasks/id for the created task returns the task
+    const taskByIdResponse = await request(app).get(`/tasks/${taskId}`)
+    expect(taskByIdResponse.status).toBe(200)
+    expect(taskByIdResponse.body).toEqual(postResponse.body)
+  })
+
+  it('creates a task without a description', async () => {
+    const postResponse = await request(app)
+      .post('/tasks')
+      .send({ ...newTaskNoId, description: undefined })
+    expect(postResponse.status).toBe(201)
+    expect(postResponse.body).toHaveProperty('id')
+    expect(postResponse.body.title).toBe(newTaskNoId.title)
+    expect(postResponse.body.description).toBe('')
+    expect(postResponse.body.completed).toBe(false)
+
+    const taskId = postResponse.body.id
+
+    const tasksResponse = await request(app).get('/tasks')
+    expect(tasksResponse.status).toBe(200)
+    expect(tasksResponse.body.tasks).toHaveLength(1)
+
     const taskByIdResponse = await request(app).get(`/tasks/${taskId}`)
     expect(taskByIdResponse.status).toBe(200)
     expect(taskByIdResponse.body).toEqual(postResponse.body)
@@ -71,7 +89,6 @@ describe('POST /tasks', () => {
     expect(postResponse.status).toBe(201)
     expect(postResponse.body.id).toBe(taskWithId.id)
 
-    // Check that /tasks returns length of 2
     let tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
@@ -84,21 +101,76 @@ describe('POST /tasks', () => {
       `Task ${taskWithId.id} already exists`,
     )
 
-    // Check that /tasks returns length of 2 (unchanged)
     tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
   })
 
   it('returns 400 when id is not string | number', async () => {
-    const postResponse = await request(app)
+    let postResponse = await request(app)
       .post('/tasks')
       .send({ ...newTaskNoId, id: true })
 
     expect(postResponse.status).toBe(400)
     expect(postResponse.body).toHaveProperty(
       'error',
-      'Invalid Task; id must be string or number',
+      'Invalid Task: id must be string or number',
+    )
+
+    postResponse = await request(app)
+      .post('/tasks')
+      .send({ ...newTaskNoId, id: {} })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: id must be string or number',
+    )
+  })
+
+  it('returns 400 when title is not string', async () => {
+    let postResponse = await request(app)
+      .post('/tasks')
+      .send({ ...newTaskNoId, title: [] })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: title must be string',
+    )
+
+    postResponse = await request(app)
+      .post('/tasks')
+      .send({ ...newTaskNoId, title: null })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: title must be string',
+    )
+  })
+
+  it('returns 400 when description is not string', async () => {
+    const postResponse = await request(app)
+      .post('/tasks')
+      .send({ ...newTaskNoId, description: 456 })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: description must be string',
+    )
+  })
+
+  it('returns 400 when completed is not boolean', async () => {
+    const postResponse = await request(app)
+      .post('/tasks')
+      .send({ ...newTaskNoId, completed: 'true' })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: completed must be boolean',
     )
   })
 
@@ -110,7 +182,7 @@ describe('POST /tasks', () => {
     expect(postResponse.status).toBe(400)
     expect(postResponse.body).toHaveProperty(
       'error',
-      'Invalid Task; title required',
+      'Invalid Task: title required',
     )
   })
 })
