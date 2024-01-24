@@ -9,7 +9,7 @@ const port = 3000
 const tasks: Task[] = []
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('Hello, World!')
+  res.redirect('/tasks')
 })
 
 app.get('/tasks', (req: Request & { page?: number }, res: Response) => {
