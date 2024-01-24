@@ -325,7 +325,7 @@ describe('PUT /tasks/:id', () => {
     expect(response.status).toBe(400)
     expect(response.body).toHaveProperty(
       'error',
-      'Invalid update; title required',
+      'Invalid Task: title required',
     )
   })
 
@@ -339,7 +339,53 @@ describe('PUT /tasks/:id', () => {
     expect(response.status).toBe(400)
     expect(response.body).toHaveProperty(
       'error',
-      'Invalid update; completed required',
+      'Invalid Task: completed required',
+    )
+  })
+
+  it('returns 400 when title is not string', async () => {
+    let postResponse = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send({ ...task, title: [] })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: title must be string',
+    )
+
+    postResponse = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send({ ...task, title: null })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: title must be string',
+    )
+  })
+
+  it('returns 400 when description is not string', async () => {
+    const postResponse = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send({ ...task, description: 456 })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: description must be string',
+    )
+  })
+
+  it('returns 400 when completed is not boolean', async () => {
+    const postResponse = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send({ ...task, completed: 'true' })
+
+    expect(postResponse.status).toBe(400)
+    expect(postResponse.body).toHaveProperty(
+      'error',
+      'Invalid Task: completed must be boolean',
     )
   })
 })

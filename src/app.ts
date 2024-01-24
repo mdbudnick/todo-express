@@ -86,6 +86,14 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
     return
   }
 
+  const isValidTask = validateTaskFields(req.body)
+  if (!isValidTask.valid) {
+    res.status(400).json({
+      error: `Invalid Task: ${isValidTask.field!} must be ${isValidTask.type!}`,
+    })
+    return
+  }
+
   const { id, title, description, completed }: Task = req.body
 
   if (id && id !== taskId) {
@@ -93,17 +101,11 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
     return
   }
   if (!title) {
-    res.status(400).json({ error: 'Invalid update; title required' })
+    res.status(400).json({ error: 'Invalid Task: title required' })
     return
   }
   if (completed == undefined) {
-    res.status(400).json({ error: 'Invalid update; completed required' })
-    return
-  }
-  if (typeof completed !== 'boolean') {
-    res
-      .status(400)
-      .json({ error: 'Invalid update; completed must be a boolean' })
+    res.status(400).json({ error: 'Invalid Task: completed required' })
     return
   }
 
