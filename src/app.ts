@@ -41,6 +41,14 @@ app.post('/tasks', (req: Request, res: Response) => {
       res.status(400).json({ error: 'Invalid Task; title required' });
       return;
     }
+    if (id || id === 0) {
+        const existingTaskIndex = tasks.findIndex((t) => t.id === id);
+
+        if (existingTaskIndex !== -1) {
+            res.status(409).json({ error: `Task ${taskId} already exists` });
+            return;
+        }
+    }
   
     const newTask: Task = {
       id: id ?? taskId++,
