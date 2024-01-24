@@ -30,16 +30,17 @@ type ValidationResult = {
   type?: string
 }
 
-const validateTask = (task: Task): ValidationResult => {
+const validateTaskFields = (task: Task): ValidationResult => {
   for (const field in task) {
-    if (!(field in expectedTypes)) {
-      return { valid: false, message: `Unexpected field ${field}` }
-    }
+    // TODO probably won't need
+    // if (!(field in expectedTypes)) {
+    //   return { valid: false, message: `Unexpected field ${field}` }
+    // }
 
     const expectedType = expectedTypes[field]
     const actualType = typeof task[field as keyof Task]
 
-    if (!expectedType.includes(actualType)) {
+    if (actualType !== 'undefined' && !expectedType.includes(actualType)) {
       return {
         valid: false,
         message: 'Invalid type',
