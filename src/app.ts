@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import Task from './Task';
+import Task, { equalTasks } from './Task';
 
 const app = express();
 app.use(bodyParser.json());
@@ -73,11 +73,10 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
         completed,
     };
 
-    // TODO need equality function
-    // if (tasks[existingTaskIndex] == updatedTask) {
-    //     res.status(304).json(updatedTask);
-    //     return;
-    // }
+    if (equalTasks(tasks[existingTaskIndex], updatedTask)) {
+        res.status(304).json(updatedTask);
+        return;
+    }
 
     tasks[existingTaskIndex] = updatedTask;
 
