@@ -84,6 +84,19 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
     res.json(updatedTask);
 });
 
+app.delete('/tasks/:id', (req: Request, res: Response) => {
+    const id = parseTaskId(req.params.id);
+  
+    const existingTaskIndex = tasks.findIndex((t) => t.id === id);
+  
+    if (existingTaskIndex === -1) {
+      res.status(404).json({ error: `Task ${id} not found` });
+    } else {
+      const deletedTask = tasks.splice(existingTaskIndex, 1)[0];
+      res.json(deletedTask);
+    }
+});
+
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
