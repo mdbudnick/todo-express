@@ -16,9 +16,13 @@ app.get('/tasks', (req: Request, res: Response) => {
     res.json(tasks);
 });
 
+const parseTaskId = (id: string): string | number => {
+    const numericId = parseInt(id, 10);
+    return isNaN(numericId) ? id : numericId;
+}
+
 app.get('/tasks/:id', (req: Request, res: Response) => {
-    const numericId = parseInt(req.params.id, 10);
-    const taskId = isNaN(numericId) ? req.params.id : numericId;
+    const taskId =  parseTaskId(req.params.id);
 
     const task = tasks.find((t) => t.id === taskId);
 
@@ -48,6 +52,36 @@ app.post('/tasks', (req: Request, res: Response) => {
     tasks.push(newTask);
   
     res.status(201).json(newTask);
+});
+
+app.put('/tasks/:id', (req: Request, res: Response) => {
+    const id = parseTaskId(req.params.id);
+
+    const existingTaskIndex = tasks.findIndex((t) => t.id === id);
+
+    if (existingTaskIndex === -1) {
+        res.status(404).json({ error: `Task ${id} not found` });
+        return;
+    }
+
+    const { title, description, completed }: Task = req.body;
+
+    const updatedTask: Task = {
+        id,
+        title,
+        description,
+        completed,
+    };
+
+    // TODO need equality function
+    // if (tasks[existingTaskIndex] == updatedTask) {
+    //     res.status(304).json(updatedTask);
+    //     return;
+    // }
+
+    tasks[existingTaskIndex] = updatedTask;
+
+    res.json(updatedTask);
 });
 
 app.listen(port, () => {
