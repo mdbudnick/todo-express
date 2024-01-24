@@ -1,6 +1,15 @@
 import request from 'supertest'
 import app from '../src/app'
 
+afterEach(async () => {
+  let tasksResponse = await request(app).get('/tasks')
+  for (const task of tasksResponse.body.tasks) {
+    await request(app).delete(`/tasks/${task.id}`)
+  }
+  tasksResponse = await request(app).get('/tasks')
+  expect(tasksResponse.body.tasks).toHaveLength(0)
+})
+
 describe('GET /', () => {
   it('responds with a redirect to /tasks', async () => {
     const response = await request(app).get('/')
@@ -22,14 +31,19 @@ describe('GET /tasks', () => {
 const newTask = {
   title: 'New Task',
   description: 'Description for the new task',
-  completed: false,
 }
 
 const taskWithId = {
-  id: 'existingId',
-  title: 'Existing Task',
-  description: 'Description for the existing task',
+  id: 'id',
+  title: 'Some Task',
+  description: 'Description for a defined task',
   completed: true,
+}
+
+const anotherTaskWithId = {
+  id: 'anotherId',
+  title: 'Another Task',
+  description: 'Description for the third task',
 }
 
 describe('POST /tasks', () => {
@@ -40,7 +54,8 @@ describe('POST /tasks', () => {
     expect(postResponse.body).toHaveProperty('id')
     expect(postResponse.body.title).toBe(newTask.title)
     expect(postResponse.body.description).toBe(newTask.description)
-    expect(postResponse.body.completed).toBe(newTask.completed)
+    // Defaults completed to false
+    expect(postResponse.body.completed).toBe(false)
 
     const taskId = postResponse.body.id
 
@@ -64,8 +79,7 @@ describe('POST /tasks', () => {
     // Check that /tasks returns length of 2
     let tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
-    expect(tasksResponse.body.tasks).toHaveLength(2)
-    console.log(tasksResponse.body.tasks)
+    expect(tasksResponse.body.tasks).toHaveLength(1)
 
     postResponse = await request(app).post('/tasks').send(taskWithId)
 
@@ -78,6 +92,6 @@ describe('POST /tasks', () => {
     // Check that /tasks returns length of 2 (unchanged)
     tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
-    expect(tasksResponse.body.tasks).toHaveLength(2)
+    expect(tasksResponse.body.tasks).toHaveLength(1)
   })
 })
