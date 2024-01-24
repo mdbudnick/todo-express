@@ -35,7 +35,6 @@ app.get('/tasks/:id', (req: Request, res: Response) => {
   const taskId = parseTaskId(req.params.id)
 
   const task = tasks.find((t) => t.id === taskId)
-
   if (!task) {
     res.status(404).json({ error: `Task ${req.params.id} not found` })
   } else {
@@ -46,7 +45,6 @@ app.get('/tasks/:id', (req: Request, res: Response) => {
 let GLOBAL_TASK_ID_INCREMENTER = 1000
 app.post('/tasks', (req: Request, res: Response) => {
   const { id, title, description, completed }: Task = req.body
-
   if (!title) {
     res.status(400).json({ error: 'Invalid Task; title required' })
     return
@@ -66,7 +64,6 @@ app.post('/tasks', (req: Request, res: Response) => {
     description: description ?? '',
     completed: completed ?? false,
   }
-
   tasks.push(newTask)
 
   res.status(201).json(newTask)
@@ -81,11 +78,20 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
     res.status(404).json({ error: `Task ${taskId} not found` })
     return
   }
+  const existingTask = tasks[existingTaskIndex]
 
   const { id, title, description, completed }: Task = req.body
 
   if (id && id !== taskId) {
     res.status(405).json({ error: 'Unable to modify Task id' })
+    return
+  }
+  if (!title) {
+    res.status(400).json({ error: 'Invalid update; title required' })
+    return
+  }
+  if (completed == undefined) {
+    res.status(400).json({ error: 'Invalid update; completed required' })
     return
   }
 

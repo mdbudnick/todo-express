@@ -1,5 +1,6 @@
 import request from 'supertest'
 import app from '../src/app'
+import Task, { equalTasks } from '../src/Task'
 
 afterEach(async () => {
   let tasksResponse = await request(app).get('/tasks')
@@ -114,5 +115,80 @@ describe('DELETE /tasks/:id', () => {
     tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(0)
+  })
+})
+
+describe('PUT /tasks/:id', () => {
+  let task: Task
+  beforeEach(async () => {
+    const response = await request(app).post('/tasks').send(newTask)
+    task = response.body
+  })
+
+  it('updates the title field', async () => {
+    const updatedTask = { ...task, title: 'Updated Title' }
+
+    const response = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send(updatedTask)
+    expect(response.status).toBe(200)
+
+    // Check that fields in the response are as expected
+    expect(response.body.title).toBe(updatedTask.title)
+
+    // Check that the task returned from GET /tasks/:id is as expected
+    const taskByIdResponse = await request(app).get(`/tasks/${task.id}`)
+    expect(taskByIdResponse.status).toBe(200)
+    expect(equalTasks(taskByIdResponse.body, { ...task, ...updatedTask })).toBe(
+      true,
+    )
+  })
+
+  it('updates the description field', async () => {
+    const updatedTask = { ...task, description: 'Updated Description' }
+
+    const response = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send(updatedTask)
+    expect(response.status).toBe(200)
+
+    // Check that fields in the response are as expected
+    expect(response.body.description).toBe(updatedTask.description)
+
+    // Check that the task returned from GET /tasks/:id is as expected
+    const taskByIdResponse = await request(app).get(`/tasks/${task.id}`)
+    expect(taskByIdResponse.status).toBe(200)
+    expect(equalTasks(taskByIdResponse.body, { ...task, ...updatedTask })).toBe(
+      true,
+    )
+  })
+
+  it('updates the completed field', async () => {
+    const updatedTask = { ...task, completed: true }
+
+    const response = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send(updatedTask)
+    expect(response.status).toBe(200)
+
+    // Check that fields in the response are as expected
+    expect(response.body.completed).toBe(updatedTask.completed)
+
+    // Check that the task returned from GET /tasks/:id is as expected
+    const taskByIdResponse = await request(app).get(`/tasks/${task.id}`)
+    expect(taskByIdResponse.status).toBe(200)
+    expect(equalTasks(taskByIdResponse.body, { ...task, ...updatedTask })).toBe(
+      true,
+    )
+  })
+
+  it('returns 405 when attempting to update the id field', async () => {
+    const updatedTask = { ...task, id: 'newId' }
+
+    const response = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send(updatedTask)
+    expect(response.status).toBe(405)
+    expect(response.body).toHaveProperty('error', 'Unable to modify Task id')
   })
 })
