@@ -40,12 +40,6 @@ const taskWithId = {
   completed: true,
 }
 
-const anotherTaskWithId = {
-  id: 'anotherId',
-  title: 'Another Task',
-  description: 'Description for the third task',
-}
-
 describe('POST /tasks', () => {
   it('creates a task without a set id', async () => {
     const postResponse = await request(app).post('/tasks').send(newTask)
@@ -93,5 +87,32 @@ describe('POST /tasks', () => {
     tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
+  })
+})
+
+describe('DELETE /tasks/:id', () => {
+  it('deletes one task and checks the remaining tasks', async () => {
+    await request(app).post('/tasks').send(taskWithId)
+
+    const tasksResponseBeforeDelete = await request(app).get('/tasks')
+    expect(tasksResponseBeforeDelete.status).toBe(200)
+    expect(tasksResponseBeforeDelete.body.tasks).toHaveLength(1)
+
+    let getTaskResponse = await request(app).get(`/tasks/${taskWithId.id}`)
+    expect(getTaskResponse.status).toBe(200)
+
+    let tasksResponse = await request(app).get('/tasks')
+    expect(tasksResponse.status).toBe(200)
+    expect(tasksResponse.body.tasks).toHaveLength(1)
+
+    const deleteResponse = await request(app).delete(`/tasks/${taskWithId.id}`)
+    expect(deleteResponse.status).toBe(200)
+
+    getTaskResponse = await request(app).get(`/tasks/${taskWithId.id}`)
+    expect(getTaskResponse.status).toBe(404)
+
+    tasksResponse = await request(app).get('/tasks')
+    expect(tasksResponse.status).toBe(200)
+    expect(tasksResponse.body.tasks).toHaveLength(0)
   })
 })
