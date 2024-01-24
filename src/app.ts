@@ -1,7 +1,9 @@
 import express, { Request, Response } from 'express';
+import bodyParser from 'body-parser';
 import Task from './Task';
 
 const app = express();
+app.use(bodyParser.json());
 const port = 3000;
 
 const tasks: Task[] = [];
@@ -25,6 +27,27 @@ app.get('/tasks/:id', (req: Request, res: Response) => {
     } else {
       res.status(200).json(task);
     }
+});
+
+let taskId = 1000;
+app.post('/tasks', (req: Request, res: Response) => {
+    const { id, title, description, completed }: Task = req.body;
+  
+    if (!title) {
+      res.status(400).json({ error: 'Invalid Task; title required' });
+      return;
+    }
+  
+    const newTask: Task = {
+      id: id ?? taskId++,
+      title,
+      description: description ?? "",
+      completed: completed ?? false,
+    };
+  
+    tasks.push(newTask);
+  
+    res.status(201).json(newTask);
 });
 
 app.listen(port, () => {
