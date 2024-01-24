@@ -4,7 +4,6 @@ import Task, { equalTasks } from './Task'
 
 const app = express()
 app.use(bodyParser.json())
-const port = 3000
 
 const tasks: Task[] = []
 
@@ -120,6 +119,4 @@ app.delete('/tasks/:id', (req: Request, res: Response) => {
   }
 })
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`)
-})
+export default app
