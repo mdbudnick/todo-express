@@ -55,19 +55,24 @@ app.post('/tasks', (req: Request, res: Response) => {
 });
 
 app.put('/tasks/:id', (req: Request, res: Response) => {
-    const id = parseTaskId(req.params.id);
+    const taskId = parseTaskId(req.params.id);
 
-    const existingTaskIndex = tasks.findIndex((t) => t.id === id);
+    const existingTaskIndex = tasks.findIndex((t) => t.id === taskId);
 
     if (existingTaskIndex === -1) {
-        res.status(404).json({ error: `Task ${id} not found` });
+        res.status(404).json({ error: `Task ${taskId} not found` });
         return;
     }
 
-    const { title, description, completed }: Task = req.body;
+    const { id, title, description, completed }: Task = req.body;
+
+    if (id && id !== taskId) {
+        res.status(405).json({ error: 'Unable to modify Task id' });
+        return;
+    }
 
     const updatedTask: Task = {
-        id,
+        id: taskId,
         title,
         description,
         completed,
