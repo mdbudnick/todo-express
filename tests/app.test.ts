@@ -163,6 +163,25 @@ describe('PUT /tasks/:id', () => {
     )
   })
 
+  it('defaults to empty description field if not provided', async () => {
+    const updatedTask = { ...task, description: undefined }
+
+    const response = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send(updatedTask)
+    expect(response.status).toBe(200)
+
+    // Check that fields in the response are as expected
+    expect(response.body.description).toBe('')
+
+    // Check that the task returned from GET /tasks/:id is as expected
+    const taskByIdResponse = await request(app).get(`/tasks/${task.id}`)
+    expect(taskByIdResponse.status).toBe(200)
+    expect(
+      equalTasks(taskByIdResponse.body, { ...task, description: '' }),
+    ).toBe(true)
+  })
+
   it('updates the completed field', async () => {
     const updatedTask = { ...task, completed: true }
 
@@ -182,6 +201,14 @@ describe('PUT /tasks/:id', () => {
     )
   })
 
+  it('returns 404 when attempting to update a non-existent Task', async () => {
+    const updatedTask = { ...task }
+
+    const response = await request(app).put('/tasks/fakeId').send(updatedTask)
+    expect(response.status).toBe(404)
+    expect(response.body).toHaveProperty('error', 'Task fakeId not found')
+  })
+
   it('returns 405 when attempting to update the id field', async () => {
     const updatedTask = { ...task, id: 'newId' }
 
@@ -190,5 +217,33 @@ describe('PUT /tasks/:id', () => {
       .send(updatedTask)
     expect(response.status).toBe(405)
     expect(response.body).toHaveProperty('error', 'Unable to modify Task id')
+  })
+
+  it('returns 400 when attempting to remove title', async () => {
+    const updatedTask = { ...task, title: '' }
+
+    const response = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send(updatedTask)
+
+    expect(response.status).toBe(400)
+    expect(response.body).toHaveProperty(
+      'error',
+      'Invalid update; title required',
+    )
+  })
+
+  it('returns 400 when attempting to remove completed', async () => {
+    const updatedTask = { ...task, completed: undefined }
+
+    const response = await request(app)
+      .put(`/tasks/${task.id}`)
+      .send(updatedTask)
+
+    expect(response.status).toBe(400)
+    expect(response.body).toHaveProperty(
+      'error',
+      'Invalid update; completed required',
+    )
   })
 })

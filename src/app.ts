@@ -93,11 +93,17 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
     res.status(400).json({ error: 'Invalid update; completed required' })
     return
   }
+  if (typeof completed !== 'boolean') {
+    res
+      .status(400)
+      .json({ error: 'Invalid update; completed must be a boolean' })
+    return
+  }
 
   const updatedTask: Task = {
     id: taskId,
     title,
-    description,
+    description: description ?? '',
     completed,
   }
 
