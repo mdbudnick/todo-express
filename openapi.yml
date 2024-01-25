@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: Task API
   version: 1.0.0
@@ -84,13 +84,18 @@ paths:
                 completed: false
         '404':
           description: Task not found
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                error: "Invalid Task: title required"
         '405':
           description: Method Not Allowed
           content:
             application/json:
               example:
-                error: "Method Not Allowed"
-                message: "Unable to modify Task id"
+                error: "Unable to modify Task id"
 
     delete:
       summary: Delete a task
