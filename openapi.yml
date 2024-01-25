@@ -6,13 +6,28 @@ info:
 paths:
   /tasks:
     get:
-      summary: Get all tasks
+      summary: Get paginated list of tasks
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number for pagination
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of tasks per page (minimum 0)
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               example:
+                totalTasks: 5
+                currentPage: 1
+                pageSize: 200
                 tasks: []
 
     post:
