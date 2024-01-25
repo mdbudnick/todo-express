@@ -1,0 +1,65 @@
+name: Sync Models
+
+on:
+  push:
+    paths:
+      - 'src/models/**'
+  workflow_dispatch:
+
+jobs:
+  sync-models:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Current Repository
+        uses: actions/checkout@v4
+        with:
+          path: todo-express
+          sparse-checkout: |
+            .github
+            src/models
+          repository: mdbudnick/todo-express
+          token: ${{ secrets.REPO_TOKEN }}
+
+      - name: Checkout Frontend Repository
+        uses: actions/checkout@v4
+        with:
+          path: todo-nextjs
+          repository: mdbudnick/todo-nextjs
+          token: ${{ secrets.REPO_TOKEN }}
+
+      - name: Copy Models
+        run: |
+          mkdir -p ./todo-nextjs/src/models
+          for file in ./todo-express/src/models/*; do
+            # Create a new file with the warning comment
+            echo "// Warning: Do not manually edit this file. It is automatically generated!" > "./todo-nextjs/src/models/$(basename $file)"
+            echo "" >> "./todo-nextjs/src/models/$(basename $file)"
+            # Append the content of the original file
+            cat "$file" >> "./todo-nextjs/src/models/$(basename $file)"
+          done
+
+      - name: Commit Changes
+        run: |
+          cd todo-express
+          current_commit=$(git rev-parse HEAD | cut -c1-6)
+          echo $current_commit
+          new_branch="sync_models_${current_commit}"
+          echo "NEW_BRANCH=$new_branch" >> $GITHUB_ENV
+          cd ../todo-nextjs
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout -b $new_branch
+          git add .
+          git commit -m "Sync models from todo-express ${current_commit}"
+          git push --set-upstream origin $new_branch
+        
+      - name: Create Pull Request
+        run: |
+          current_time=$(date +"%Y-%m-%d %H:%M:%S")
+          pr_title="Sync models from mdbudnick/todo-express - ${current_time}"
+          pr_body="Automated PR to sync models from todo-express backend"
+          
+          gh pr create --base main --head ${{ env.NEW_BRANCH }} --title "$pr_title" --body "$pr_body" --repo mdbudnick/todo-nextjs
+        env:
+          GH_TOKEN: ${{ secrets.REPO_TOKEN }}
