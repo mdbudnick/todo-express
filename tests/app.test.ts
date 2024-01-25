@@ -1,6 +1,6 @@
 import request from 'supertest'
 import app from '../src/app'
-import Task, { equalTasks } from '../src/Task'
+import Task, { equalTasks } from '../src/models/Task'
 
 afterEach(async () => {
   let tasksResponse = await request(app).get('/tasks')
@@ -77,6 +77,7 @@ describe('POST /tasks', () => {
     const tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
+    expect(tasksResponse.body.total).toBe(1)
 
     const taskByIdResponse = await request(app).get(`/tasks/${taskId}`)
     expect(taskByIdResponse.status).toBe(200)
@@ -92,6 +93,7 @@ describe('POST /tasks', () => {
     let tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
+    expect(tasksResponse.body.total).toBe(1)
 
     postResponse = await request(app).post('/tasks').send(taskWithId)
 
@@ -104,6 +106,7 @@ describe('POST /tasks', () => {
     tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
+    expect(tasksResponse.body.total).toBe(1)
   })
 
   it('returns 400 when id is not string | number', async () => {
@@ -194,6 +197,7 @@ describe('DELETE /tasks/:id', () => {
     const tasksResponseBeforeDelete = await request(app).get('/tasks')
     expect(tasksResponseBeforeDelete.status).toBe(200)
     expect(tasksResponseBeforeDelete.body.tasks).toHaveLength(1)
+    expect(tasksResponseBeforeDelete.body.total).toBe(1)
 
     let getTaskResponse = await request(app).get(`/tasks/${taskWithId.id}`)
     expect(getTaskResponse.status).toBe(200)
@@ -201,6 +205,7 @@ describe('DELETE /tasks/:id', () => {
     let tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(1)
+    expect(tasksResponse.body.total).toBe(1)
 
     const deleteResponse = await request(app).delete(`/tasks/${taskWithId.id}`)
     expect(deleteResponse.status).toBe(200)
@@ -211,6 +216,7 @@ describe('DELETE /tasks/:id', () => {
     tasksResponse = await request(app).get('/tasks')
     expect(tasksResponse.status).toBe(200)
     expect(tasksResponse.body.tasks).toHaveLength(0)
+    expect(tasksResponse.body.total).toBe(0)
   })
 })
 

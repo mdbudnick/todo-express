@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import bodyParser from 'body-parser'
-import Task, { equalTasks, validateTaskFields } from './Task'
+import Task, { equalTasks, validateTaskFields } from './models/Task'
 
 const app = express()
 app.use(bodyParser.json())
@@ -30,7 +30,7 @@ app.get(
     const paginatedTasks = tasks.slice(startIndex, endIndex)
 
     res.json({
-      totalTasks: tasks.length,
+      total: tasks.length,
       currentPage: req.page,
       pageSize,
       tasks: paginatedTasks,
