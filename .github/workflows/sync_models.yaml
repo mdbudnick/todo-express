@@ -33,9 +33,6 @@ jobs:
           mkdir -p ./todo-nextjs/src/models
           for file in ./todo-express/src/models/*; do
               cat "$file" > "./todo-nextjs/src/models/$(basename $file)"
-              
-              # Set read-only permission
-              chmod 444 "./todo-nextjs/src/models/$(basename $file)"
           done
 
       - name: Commit Changes
