@@ -32,11 +32,10 @@ jobs:
         run: |
           mkdir -p ./todo-nextjs/src/models
           for file in ./todo-express/src/models/*; do
-            # Create a new file with the warning comment
-            echo "// Warning: Do not manually edit this file. It is automatically generated!" > "./todo-nextjs/src/models/$(basename $file)"
-            echo "" >> "./todo-nextjs/src/models/$(basename $file)"
-            # Append the content of the original file
-            cat "$file" >> "./todo-nextjs/src/models/$(basename $file)"
+              cat "$file" > "./todo-nextjs/src/models/$(basename $file)"
+              
+              # Set read-only permission
+              chmod 444 "./todo-nextjs/src/models/$(basename $file)"
           done
 
       - name: Commit Changes
