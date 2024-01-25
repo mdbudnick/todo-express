@@ -11,20 +11,32 @@ app.get('/', (req: Request, res: Response) => {
   res.redirect('/tasks')
 })
 
-app.get('/tasks', (req: Request & { page?: number }, res: Response) => {
-  const pageSize = 200
-  const startIndex = (req.page ?? 1 - 1) * pageSize
-  const endIndex = startIndex + pageSize
+app.get(
+  '/tasks',
+  (req: Request & { page?: number; pageSize?: number }, res: Response) => {
+    if (
+      (req.pageSize && isNaN(req.pageSize)) ||
+      (req.pageSize && req.pageSize < 0)
+    ) {
+      res.status(400).json({ error: 'Invalid pageSize parameter' })
+    }
+    const pageSize =
+      req.pageSize && !isNaN(req.pageSize) && req.pageSize >= 0
+        ? req.pageSize
+        : 200
+    const startIndex = ((req.page ?? 1) - 1) * pageSize
+    const endIndex = startIndex + pageSize
 
-  const paginatedTasks = tasks.slice(startIndex, endIndex)
+    const paginatedTasks = tasks.slice(startIndex, endIndex)
 
-  res.json({
-    totalTasks: tasks.length,
-    currentPage: req.page,
-    pageSize,
-    tasks: paginatedTasks,
-  })
-})
+    res.json({
+      totalTasks: tasks.length,
+      currentPage: req.page,
+      pageSize,
+      tasks: paginatedTasks,
+    })
+  },
+)
 
 const parseTaskId = (id: string): string | number => {
   const numericId = parseInt(id, 10)
