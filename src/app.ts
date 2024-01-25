@@ -116,11 +116,6 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
     completed,
   }
 
-  if (equalTasks(tasks[existingTaskIndex], updatedTask)) {
-    res.status(304).json(updatedTask)
-    return
-  }
-
   tasks[existingTaskIndex] = updatedTask
 
   res.json(updatedTask)
