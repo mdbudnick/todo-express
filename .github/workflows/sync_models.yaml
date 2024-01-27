@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p ./todo-nextjs/src/models
           for file in ./todo-express/src/models/*; do
-              cat "$file" > "./todo-nextjs/src/models/$(basename $file)"
+              cat "$file" > "./todo-nextjs/app/models/$(basename $file)"
           done
 
       - name: Commit Changes
