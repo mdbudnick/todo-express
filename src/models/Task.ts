@@ -1,8 +1,8 @@
 interface Task {
-  id: string | number
+  id?: string | number
   title: string
-  description: string
-  completed: boolean
+  description?: string
+  completed?: boolean
 }
 
 const expectedTypes: Record<string, string[]> = {
@@ -18,7 +18,6 @@ export const equalTasks = (task1: Task, task2: Task): boolean => {
       return false
     }
   }
-  // TODO only check the Task has the keys we want
 
   return true
 }
@@ -32,11 +31,6 @@ type ValidationResult = {
 
 export const validateTaskFields = (task: Task): ValidationResult => {
   for (const field in task) {
-    // TODO probably won't need
-    // if (!(field in expectedTypes)) {
-    //   return { valid: false, message: `Unexpected field ${field}` }
-    // }
-
     const expectedType = expectedTypes[field]
     const actualType = typeof task[field as keyof Task]
 
