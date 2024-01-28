@@ -114,7 +114,7 @@ app.post('/tasks', (req: Request, res: Response) => {
     description: description ?? '',
     completed: completed ?? false,
   }
-  const userTasks: Task[] = (tasks.get(sessionId) ?? [])
+  const userTasks: Task[] = tasks.get(sessionId) ?? []
   userTasks.push(newTask)
   tasks.set(sessionId, userTasks)
 
