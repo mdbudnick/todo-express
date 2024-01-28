@@ -25,10 +25,11 @@ paths:
           content:
             application/json:
               example:
-                total: 5
-                currentPage: 1
+                total: 1
+                totalPages: 1
+                page: 1
                 pageSize: 200
-                tasks: []
+                tasks: [{ title: "New Task", description: "Description for the new task", completed: false }]
 
     post:
       summary: Create a new task

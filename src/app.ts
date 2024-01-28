@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser'
 import Task, { validateTaskFields } from './models/Task'
 import { type UUID, randomUUID } from 'crypto'
 import cors from 'cors'
+import PaginatedTasks from './models/PaginatedTasks'
 
 const app = express()
 app.use(bodyParser.json())
@@ -60,17 +61,23 @@ app.get(
       req.pageSize && !isNaN(req.pageSize) && req.pageSize >= 0
         ? req.pageSize
         : 200
-    const startIndex = ((req.page ?? 1) - 1) * pageSize
+    const page = req.page ?? 1
+    const startIndex = (page - 1) * pageSize
     const endIndex = startIndex + pageSize
     const allUserTasks = tasks.get(sessionId) ?? []
-    const paginatedTasks = allUserTasks.slice(startIndex, endIndex)
+    const pageTasks = allUserTasks.slice(startIndex, endIndex)
+    const total = allUserTasks.length
+    const totalPages = Math.ceil(total / pageSize)
 
-    res.json({
-      total: allUserTasks.length,
-      currentPage: req.page,
+    const toReturn: PaginatedTasks = {
+      total,
+      totalPages,
       pageSize,
-      tasks: paginatedTasks,
-    })
+      page,
+      tasks: pageTasks,
+    }
+
+    res.json(toReturn)
   },
 )
 
