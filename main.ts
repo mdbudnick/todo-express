@@ -1,4 +1,4 @@
-import app from 'src/app'
+import app from './src/app'
 
 // eslint-disable-next-line no-undef
 const port = process.env.APP_PORT ?? 3001

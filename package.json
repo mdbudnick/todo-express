@@ -4,11 +4,11 @@
   "description": "CRUD server for TODO application",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/app.ts",
+    "start": "ts-node main.ts",
     "build": "tsc",
     "lint": "eslint jest.config.ts src/**/*.ts tests/**/*.ts",
     "lint:fix": "eslint --fix jest.config.ts src/**/*.ts tests/**/*.ts",
-    "dev": "nodemon --exec ts-node src/app.ts",
+    "dev": "nodemon --exec ts-node main.ts",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -20,12 +20,14 @@
     "@types/node": "^20.11.6",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.6",
+    "@types/cors": "^2.8.17",
     "@types/jest": "^29.5.11",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.19.1",

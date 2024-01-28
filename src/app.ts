@@ -3,10 +3,18 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import Task, { validateTaskFields } from './models/Task'
 import { type UUID, randomUUID } from 'crypto'
+import cors from 'cors'
 
 const app = express()
 app.use(bodyParser.json())
 app.use(cookieParser())
+app.use(
+  cors({
+    origin: process.env.FRONTEND_ORIGIN
+      ? process.env.FRONTEND_ORIGIN
+      : 'http://localhost:3000',
+  }),
+)
 
 let GLOBAL_TASK_ID_GENERATOR = 1000
 const INITIAL_TASK_TEMPLATE: Task[] = [
@@ -196,7 +204,7 @@ app.get('/session-id', (req: Request, res: Response) => {
     tasks.get(sessionId) ? tasks.get(sessionId)! : createInitialTasks(),
   )
   res.cookie('session', sessionId, { httpOnly: true })
-  res.status(200)
+  res.status(200).json(sessionId)
 })
 
 export default app
