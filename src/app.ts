@@ -17,6 +17,8 @@ app.use(
   }),
 )
 
+const API_VERSION = 'v1'
+
 let GLOBAL_TASK_ID_GENERATOR = 1000
 const INITIAL_TASK_TEMPLATE: Task[] = [
   {
@@ -44,11 +46,11 @@ const ANON_SESSION = randomUUID()
 tasks.set(ANON_SESSION, createInitialTasks())
 
 app.get('/', (req: Request, res: Response) => {
-  res.redirect('/tasks')
+  res.redirect(`/${API_VERSION}/tasks`)
 })
 
 app.get(
-  '/tasks',
+  `/${API_VERSION}/tasks`,
   (req: Request & { page?: number; pageSize?: number }, res: Response) => {
     if (
       (req.pageSize && isNaN(req.pageSize)) ||
@@ -86,7 +88,7 @@ const parseTaskId = (id: string): string | number => {
   return isNaN(numericId) ? id : numericId
 }
 
-app.get('/tasks/:id', (req: Request, res: Response) => {
+app.get(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
   const taskId = parseTaskId(req.params.id)
   const sessionId = (req.cookies?.session as UUID) ?? ANON_SESSION
 
@@ -98,7 +100,7 @@ app.get('/tasks/:id', (req: Request, res: Response) => {
   }
 })
 
-app.post('/tasks', (req: Request, res: Response) => {
+app.post(`/${API_VERSION}/tasks`, (req: Request, res: Response) => {
   const sessionId = (req.cookies?.session as UUID) ?? ANON_SESSION
   const isValidTask = validateTaskFields(req.body)
   if (!isValidTask.valid) {
@@ -136,7 +138,7 @@ app.post('/tasks', (req: Request, res: Response) => {
   res.status(201).json(newTask)
 })
 
-app.put('/tasks/:id', (req: Request, res: Response) => {
+app.put(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
   const taskId = parseTaskId(req.params.id)
   const sessionId = (req.cookies?.session as UUID) ?? ANON_SESSION
 
@@ -186,7 +188,7 @@ app.put('/tasks/:id', (req: Request, res: Response) => {
   res.json(updatedTask)
 })
 
-app.delete('/tasks/:id', (req: Request, res: Response) => {
+app.delete(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
   const id = parseTaskId(req.params.id)
   const sessionId = (req.cookies?.session as UUID) ?? ANON_SESSION
 
