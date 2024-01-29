@@ -212,7 +212,7 @@ describe('DELETE /v1/tasks/:id', () => {
     expect(tasksResponse.body.total).toBe(1)
 
     const deleteResponse = await agent.delete(`/v1/tasks/${taskWithId.id}`)
-    expect(deleteResponse.status).toBe(200)
+    expect(deleteResponse.status).toBe(204)
 
     getTaskResponse = await agent.get(`/v1/tasks/${taskWithId.id}`)
     expect(getTaskResponse.status).toBe(404)

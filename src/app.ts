@@ -200,9 +200,9 @@ app.delete(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
     res.status(404).json({ error: `Task ${id} not found` })
   } else {
     const userTasks = tasks.get(sessionId)
-    const deletedTask = userTasks!.splice(existingTaskIndex, 1)[0]
+    userTasks!.splice(existingTaskIndex, 1)[0]
     tasks.set(sessionId, userTasks!)
-    res.json(deletedTask)
+    res.status(204).json()
   }
 })
 
