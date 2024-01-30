@@ -1,3 +1,5 @@
+import Task from './Task'
+
 interface PaginatedTasks {
   total: number
   totalPages: number
