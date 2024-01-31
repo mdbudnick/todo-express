@@ -127,3 +127,6 @@ dist
 cdk.out
 
 *.tar.gz
+
+*.pem
+*.crt
