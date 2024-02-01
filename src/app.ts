@@ -9,13 +9,7 @@ import PaginatedTasks from './models/PaginatedTasks'
 const app = express()
 app.use(bodyParser.json())
 app.use(cookieParser())
-app.use(
-  cors({
-    origin: process.env.FRONTEND_ORIGIN
-      ? process.env.FRONTEND_ORIGIN
-      : 'http://localhost:3000',
-  }),
-)
+app.use(cors())
 
 const API_VERSION = 'v1'
 
