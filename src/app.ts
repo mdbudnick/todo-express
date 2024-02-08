@@ -5,6 +5,7 @@ import Task, { validateTaskFields } from './models/Task'
 import { type UUID, randomUUID } from 'crypto'
 import cors from 'cors'
 import PaginatedTasks from './models/PaginatedTasks'
+import * as tasks from './shared/tasks'
 
 const app = express()
 app.use(bodyParser.json())
@@ -12,32 +13,6 @@ app.use(cookieParser())
 app.use(cors())
 
 const API_VERSION = 'v1'
-
-let GLOBAL_TASK_ID_GENERATOR = 1000
-const INITIAL_TASK_TEMPLATE: Task[] = [
-  {
-    title: 'Create your own task',
-    description: 'Create your first task!',
-    completed: false,
-  },
-  {
-    title: 'Visit this Website',
-    description: 'Check out this website!',
-    completed: true,
-  },
-]
-const createInitialTasks = () => {
-  const tasks = []
-  for (const task of INITIAL_TASK_TEMPLATE) {
-    tasks.push({ ...task, id: ++GLOBAL_TASK_ID_GENERATOR })
-  }
-  return tasks
-}
-
-const tasks: Map<UUID, Task[]> = new Map()
-// Shared UUID for anonymous (accessed API directly)
-const ANON_SESSION = randomUUID()
-tasks.set(ANON_SESSION, createInitialTasks())
 
 app.get('/', (req: Request, res: Response) => {
   res.redirect(`/${API_VERSION}/tasks`)
@@ -52,7 +27,7 @@ app.get(
     ) {
       res.status(400).json({ error: 'Invalid pageSize parameter' })
     }
-    const sessionId = (req.cookies.session as UUID) ?? ANON_SESSION
+    const sessionId = (req.cookies.session as UUID) ?? tasks.ANON_SESSION
     const pageSize =
       req.pageSize && !isNaN(req.pageSize) && req.pageSize >= 0
         ? req.pageSize
@@ -60,7 +35,7 @@ app.get(
     const page = req.page ?? 1
     const startIndex = (page - 1) * pageSize
     const endIndex = startIndex + pageSize
-    const allUserTasks = tasks.get(sessionId) ?? []
+    const allUserTasks = tasks.get(sessionId)
     const pageTasks = allUserTasks.slice(startIndex, endIndex)
     const total = allUserTasks.length
     const totalPages = Math.ceil(total / pageSize)
@@ -84,9 +59,9 @@ const parseTaskId = (id: string): string | number => {
 
 app.get(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
   const taskId = parseTaskId(req.params.id)
-  const sessionId = (req.cookies?.session as UUID) ?? ANON_SESSION
+  const sessionId = getSessionId(req)
 
-  const task = (tasks.get(sessionId) ?? []).find((t) => t.id === taskId)
+  const task = tasks.get(sessionId).find((t) => t.id === taskId)
   if (!task) {
     res.status(404).json({ error: `Task ${req.params.id} not found` })
   } else {
@@ -95,7 +70,7 @@ app.get(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
 })
 
 app.post(`/${API_VERSION}/tasks`, (req: Request, res: Response) => {
-  const sessionId = (req.cookies?.session as UUID) ?? ANON_SESSION
+  const sessionId = getSessionId(req)
   const isValidTask = validateTaskFields(req.body)
   if (!isValidTask.valid) {
     res.status(400).json({
@@ -119,22 +94,20 @@ app.post(`/${API_VERSION}/tasks`, (req: Request, res: Response) => {
     }
   }
 
-  const newTask: Task = {
-    id: id ?? ++GLOBAL_TASK_ID_GENERATOR,
+  let newTask: Task = {
+    id,
     title,
     description: description ?? '',
     completed: completed ?? false,
   }
-  const userTasks: Task[] = tasks.get(sessionId) ?? []
-  userTasks.push(newTask)
-  tasks.set(sessionId, userTasks)
+  newTask = tasks.addNewTask(sessionId, newTask)
 
   res.status(201).json(newTask)
 })
 
 app.put(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
   const taskId = parseTaskId(req.params.id)
-  const sessionId = (req.cookies?.session as UUID) ?? ANON_SESSION
+  const sessionId = getSessionId(req)
 
   const existingTaskIndex = (tasks.get(sessionId) ?? []).findIndex(
     (t) => t.id === taskId,
@@ -184,7 +157,7 @@ app.put(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
 
 app.delete(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
   const id = parseTaskId(req.params.id)
-  const sessionId = (req.cookies?.session as UUID) ?? ANON_SESSION
+  const sessionId = getSessionId(req)
 
   const existingTaskIndex = (tasks.get(sessionId) ?? []).findIndex(
     (t) => t.id === id,
@@ -201,13 +174,18 @@ app.delete(`/${API_VERSION}/tasks/:id`, (req: Request, res: Response) => {
 })
 
 app.get('/session-id', (req: Request, res: Response) => {
-  const sessionId = (req.cookies?.session as UUID) ?? randomUUID()
-  tasks.set(
-    sessionId,
-    tasks.get(sessionId) ? tasks.get(sessionId)! : createInitialTasks(),
-  )
-  res.cookie('session', sessionId, { httpOnly: true })
+  let sessionId = req.cookies?.session
+  if (!sessionId) {
+    sessionId = randomUUID()
+    tasks.initializeTasks(sessionId)
+    res.cookie('session', sessionId, { httpOnly: true })
+  }
+
   res.status(200).json(sessionId)
 })
+
+const getSessionId = (req: Request): UUID => {
+  return (req.cookies?.session as UUID) ?? tasks.ANON_SESSION
+}
 
 export default app
